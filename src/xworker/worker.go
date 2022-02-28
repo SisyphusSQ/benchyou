@@ -10,9 +10,9 @@
 package xworker
 
 import (
+	"benchyou/src/xcommon"
 	"fmt"
 	"log"
-	"xcommon"
 
 	"github.com/xelabs/go-mysqlstack/driver"
 )

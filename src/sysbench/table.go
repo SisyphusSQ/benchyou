@@ -10,9 +10,9 @@
 package sysbench
 
 import (
+	"benchyou/src/xworker"
 	"fmt"
 	"log"
-	"xworker"
 )
 
 // Table tuple.

@@ -10,10 +10,10 @@
 package sysbench
 
 import (
+	"benchyou/src/xcommon"
+	"benchyou/src/xworker"
 	"testing"
 	"time"
-	"xcommon"
-	"xworker"
 
 	"github.com/stretchr/testify/assert"
 )

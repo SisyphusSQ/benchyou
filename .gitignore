@@ -5,3 +5,5 @@ tags
 coverage.out
 
 .idea
+
+.DS_Store

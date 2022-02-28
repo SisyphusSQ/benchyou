@@ -10,10 +10,10 @@
 package xcmd
 
 import (
+	"benchyou/src/sysbench"
+	"benchyou/src/xworker"
 	"github.com/spf13/cobra"
-	"sysbench"
 	"time"
-	"xworker"
 )
 
 // NewRangeCommand creates the new cmd.

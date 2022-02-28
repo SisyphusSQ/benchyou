@@ -10,13 +10,13 @@
 package xcmd
 
 import (
+	"benchyou/src/xcommon"
+	"benchyou/src/xstat"
+	"benchyou/src/xworker"
 	"fmt"
 	"os"
 	"text/tabwriter"
 	"time"
-	"xcommon"
-	"xstat"
-	"xworker"
 )
 
 // Stats tuple.
@@ -29,8 +29,8 @@ type Stats struct {
 	SwapSo   uint64
 	RRQM_S   float64
 	WRQM_S   float64
-	RS      float64
-	WS      float64
+	RS       float64
+	WS       float64
 	RKB_S    float64
 	WKB_S    float64
 	AWAIT    float64
