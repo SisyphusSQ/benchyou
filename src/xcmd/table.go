@@ -10,9 +10,9 @@
 package xcmd
 
 import (
+	"benchyou/src/sysbench"
+	"benchyou/src/xworker"
 	"github.com/spf13/cobra"
-	"sysbench"
-	"xworker"
 )
 
 // NewPrepareCommand creates the new cmd.

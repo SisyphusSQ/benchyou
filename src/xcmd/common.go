@@ -10,11 +10,11 @@
 package xcmd
 
 import (
+	"benchyou/src/sysbench"
+	"benchyou/src/xcommon"
+	"benchyou/src/xworker"
 	"github.com/spf13/cobra"
-	"sysbench"
 	"time"
-	"xcommon"
-	"xworker"
 )
 
 func parseConf(cmd *cobra.Command) (conf *xcommon.Conf, err error) {

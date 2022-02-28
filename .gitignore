@@ -1,6 +1,9 @@
 bin/*
 pkg/*
-src/github.com/
 
 tags
 coverage.out
+
+.idea
+
+.DS_Store

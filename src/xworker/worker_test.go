@@ -10,8 +10,8 @@
 package xworker
 
 import (
+	"benchyou/src/xcommon"
 	"testing"
-	"xcommon"
 
 	"github.com/stretchr/testify/assert"
 )

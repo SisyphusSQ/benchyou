@@ -10,12 +10,12 @@
 package xstat
 
 import (
+	"benchyou/src/xcommon"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-	"xcommon"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -24,8 +24,8 @@ import (
 type IOStat struct {
 	RRQM_S float64
 	WRQM_S float64
-	RS    float64
-	WS    float64
+	RS     float64
+	WS     float64
 	RKB_S  float64
 	WKB_S  float64
 	AWAIT  float64

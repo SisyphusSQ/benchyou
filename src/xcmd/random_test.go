@@ -10,8 +10,8 @@
 package xcmd
 
 import (
+	"benchyou/src/xcommon"
 	"testing"
-	"xcommon"
 )
 
 func TestXcmdRandom(t *testing.T) {

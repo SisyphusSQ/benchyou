@@ -10,6 +10,8 @@
 package sysbench
 
 import (
+	"benchyou/src/xcommon"
+	"benchyou/src/xworker"
 	"fmt"
 	"log"
 	"math"
@@ -17,8 +19,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"xcommon"
-	"xworker"
 )
 
 // Range tuple.

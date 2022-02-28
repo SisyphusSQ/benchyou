@@ -10,12 +10,12 @@
 package xstat
 
 import (
+	"benchyou/src/xcommon"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-	"xcommon"
 
 	"golang.org/x/crypto/ssh"
 )

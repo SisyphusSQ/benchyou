@@ -10,11 +10,11 @@
 package main
 
 import (
+	"benchyou/src/xcmd"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
 	"runtime"
-	"xcmd"
 )
 
 var (
