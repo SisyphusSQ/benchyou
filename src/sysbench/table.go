@@ -40,7 +40,7 @@ func (t *Table) Prepare() {
 							key k_1 (k)
 							) engine=%s`, i, engine)
 
-		if err := session.Exec(sql); err != nil {
+		if err := session.Exec(sql).Error; err != nil {
 			log.Panicf("creata.table.error[%v]", err)
 		}
 		log.Printf("create table benchyou%d(engine=%v) finished...\n", i, engine)
@@ -50,11 +50,15 @@ func (t *Table) Prepare() {
 // Cleanup used to cleanup the tables.
 func (t *Table) Cleanup() {
 	session := t.workers[0].S
-	count := t.workers[0].N
+	//count := t.workers[0].N
+
+	// for test
+	count := 64
+
 	for i := 0; i < count; i++ {
 		sql := fmt.Sprintf(`drop table benchyou%d;`, i)
 
-		if err := session.Exec(sql); err != nil {
+		if err := session.Exec(sql).Error; err != nil {
 			log.Panicf("drop.table.error[%v]", err)
 		}
 		log.Printf("drop table benchyou%d finished...\n", i)
