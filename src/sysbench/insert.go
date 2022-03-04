@@ -68,10 +68,10 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 	bs := int64(math.MaxInt64) / int64(num)
 	lo := bs * int64(id)
 	hi := bs * int64(id+1)
-	columns1 := "k,c,pad"
-	columns2 := "k,c,pad,id"
-	valfmt1 := "(%v,'%s', '%s'),"
-	valfmt2 := "(%v,'%s', '%s', %v),"
+	columns1 := "k,c,pad,created_at,unix_stamp"
+	columns2 := "k,c,pad,id,created_at,unix_stamp"
+	valfmt1 := "(%v,'%s', '%s', '%s', %d),"
+	valfmt2 := "(%v,'%s', '%s', %v, '%s', %d),"
 
 	for !insert.stop {
 		var sql, value string
@@ -89,20 +89,29 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 			pad := xcommon.RandString(xcommon.Padtemplate)
 			c := xcommon.RandString(xcommon.Ctemplate)
 
+			Loc, _ := time.LoadLocation("Asia/Shanghai")
+			unixStamp := time.Now().Unix() + rand.Int63n(86400)
+			createdAt := fmt.Sprintf(time.Unix(unixStamp, 0).In(Loc).Format("2006-01-02 15:04:05"))
+
 			if insert.conf.Random {
 				value = fmt.Sprintf(valfmt2,
 					xcommon.RandInt64(lo, hi),
 					c,
 					pad,
 					xcommon.RandInt64(lo, hi),
+					createdAt,
+					int32(unixStamp),
 				)
 			} else {
 				value = fmt.Sprintf(valfmt1,
 					xcommon.RandInt64(lo, hi),
 					c,
 					pad,
+					createdAt,
+					int32(unixStamp),
 				)
 			}
+			//fmt.Println(value)
 			buf.WriteString(value)
 		}
 		// -1 to trim right ','

@@ -60,10 +60,6 @@ func CreateWorkers(conf *xcommon.Conf, threads int) []Worker {
 		conf.MysqlUser, conf.MysqlPassword, conf.MysqlHost, conf.MysqlPort, conf.MysqlDb)
 	for i := 0; i < threads; i++ {
 
-		//if conn, err = driver.NewConn(conf.MysqlUser, conf.MysqlPassword, dsn, conf.MysqlDb, utf8); err != nil {
-		//	log.Panicf("create.worker.error:%v", err)
-		//}
-
 		if conn, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		}); err != nil {
@@ -76,8 +72,6 @@ func CreateWorkers(conf *xcommon.Conf, threads int) []Worker {
 			E: conf.MysqlTableEngine,
 			N: conf.OltpTablesCount,
 
-			// for test
-			//N: 64,
 		},
 		)
 	}

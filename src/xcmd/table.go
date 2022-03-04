@@ -35,6 +35,16 @@ func prepareCommandFn(cmd *cobra.Command, args []string) {
 	workers := xworker.CreateWorkers(conf, 1)
 	table := sysbench.NewTable(workers)
 	table.Prepare()
+
+	// fill up table with oltp-table-size
+	if conf.OltpTableSize >= 0 {
+		preWorkers := xworker.CreateWorkers(conf, conf.OltpTablesCount)
+		preInsert := sysbench.NewPreInsert(conf, preWorkers)
+		preInsert.Run()
+
+		// wait for complete
+		preInsert.Stop()
+	}
 }
 
 // NewCleanupCommand creates the new cmd.

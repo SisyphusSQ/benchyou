@@ -5,6 +5,11 @@
  * Copyright (c) XeLabs
  * GPL License
  *
+ * mybenchx
+ * revised by alex.zhao @2022 Spring
+ *
+ * github.com/SisyphusSQ/mybenchx
+ *
  */
 
 package main
@@ -39,13 +44,14 @@ var (
 	sshUser          string
 	sshPassword      string
 	sshPort          int
+	oltpTablesSize  int
 )
 
 var (
 	rootCmd = &cobra.Command{
-		Use:        "benchyou",
+		Use:        "mybenchx",
 		Short:      "",
-		SuggestFor: []string{"benchyou"},
+		SuggestFor: []string{"mybenchx"},
 	}
 )
 
@@ -60,7 +66,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&mysqlUser, "mysql-user", "benchyou", "MySQL user(Default benchyou)")
 	rootCmd.PersistentFlags().StringVar(&mysqlPassword, "mysql-password", "benchyou", "MySQL password(Default benchyou)")
 	rootCmd.PersistentFlags().StringVar(&mysqlDb, "mysql-db", "sbtest", "MySQL database name(Default sbtest)")
-	rootCmd.PersistentFlags().StringVar(&mysqlTableEngine, "mysql-table-engine", "innodb", "storage engine to use for the test table {tokudb,innodb,...}(Default tokudb)")
+	rootCmd.PersistentFlags().StringVar(&mysqlTableEngine, "mysql-table-engine", "innodb", "storage engine to use for the test table {tokudb,innodb,...}")
 	rootCmd.PersistentFlags().StringVar(&mysqlRangeOrder, "mysql-range-order", "ASC", "range query sort the result-set in {ASC|DESC} (Default ASC)")
 	rootCmd.PersistentFlags().IntVar(&mysqlEnableXa, "mysql-enable-xa", 0, "enable MySQL xa transaction for insertion {0|1} (Default 0)")
 	rootCmd.PersistentFlags().IntVar(&rowsPerInsert, "rows-per-insert", 1, "#rows per insert(Default 1)")
@@ -72,6 +78,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&sshUser, "ssh-user", "benchyou", "SSH server user(Default benchyou)")
 	rootCmd.PersistentFlags().StringVar(&sshPassword, "ssh-password", "benchyou", "SSH server password(Default benchyou)")
 	rootCmd.PersistentFlags().IntVar(&sshPort, "ssh-port", 22, "SSH server port(Default 22)")
+	rootCmd.PersistentFlags().IntVar(&oltpTablesSize, "oltp-table-size", 0, "If not specify, will not fill up table ")
 
 	rootCmd.AddCommand(xcmd.NewPrepareCommand())
 	rootCmd.AddCommand(xcmd.NewCleanupCommand())

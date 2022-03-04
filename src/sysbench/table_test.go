@@ -39,12 +39,23 @@ func TestPrepareTable(t *testing.T) {
 		MysqlPort:        3306,
 		MysqlDb:          "sbtest",
 		MysqlTableEngine: "innodb",
+		OltpTablesCount:  64,
+		OltpTableSize:    10,
 	}
 
 	// worker
 	workers := xworker.CreateWorkers(conf, 1)
 	table := NewTable(workers)
 	table.Prepare()
+
+	if conf.OltpTableSize >= 0 {
+		preWorkers := xworker.CreateWorkers(conf, conf.OltpTablesCount)
+		preInsert := NewPreInsert(conf, preWorkers)
+		preInsert.Run()
+
+		// wait for complete
+		preInsert.Stop()
+	}
 }
 
 func TestCleanUpTable(t *testing.T) {

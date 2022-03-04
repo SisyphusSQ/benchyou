@@ -5,6 +5,11 @@
  * Copyright (c) XeLabs
  * GPL License
  *
+ * mybenchx
+ * revised by alex.zhao @2022 Spring
+ *
+ * github.com/SisyphusSQ/mybenchx
+ *
  */
 
 package xcmd
@@ -102,6 +107,12 @@ func parseConf(cmd *cobra.Command) (conf *xcommon.Conf, err error) {
 	if conf.MysqlRangeOrder, err = cmd.Flags().GetString("mysql-range-order"); err != nil {
 		return
 	}
+
+	if conf.OltpTableSize, err = cmd.Flags().GetInt("oltp-table-size"); err != nil {
+		return
+	}
+
+
 
 	xa := 0
 	if xa, err = cmd.Flags().GetInt("mysql-enable-xa"); err != nil {

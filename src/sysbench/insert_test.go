@@ -92,9 +92,9 @@ func TestSysbenchInsertNew(t *testing.T) {
 		MysqlTableEngine: "innodb",
 		OltpTablesCount:  64,
 		ReadThreads:      10,
-		Random:           true,
+		Random:           false,
 		RowsPerInsert:    20,
-		BatchPerCommit:   10,
+		BatchPerCommit:   10000,
 	}
 
 	workers := xworker.CreateWorkers(conf, 2)

@@ -5,6 +5,8 @@
  * Copyright (c) XeLabs
  * GPL License
  *
+ * mybenchx
+ * revised by alex.zhao @2022 Spring
  */
 
 package xcommon
@@ -33,4 +35,5 @@ type Conf struct {
 	OltpTablesCount  int
 	XA               bool
 	Random           bool
+	OltpTableSize    int
 }
