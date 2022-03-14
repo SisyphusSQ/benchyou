@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -79,7 +79,7 @@ func (update *Update) Update(worker *xworker.Worker, num int, id int) {
 		}
 		c := xcommon.RandString(xcommon.Ctemplate)
 		table := rand.Int31n(int32(worker.N))
-		sql = fmt.Sprintf("update benchyou%d set c='%s' where id=%v", table, c, id)
+		sql = fmt.Sprintf("update mybenchx%d set c='%s' where id=%v", table, c, id)
 
 		t := time.Now()
 		// Txn start.
@@ -96,7 +96,7 @@ func (update *Update) Update(worker *xworker.Worker, num int, id int) {
 		if update.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err := session.Exec(sql).Error; err != nil {
+		if err := tx.Exec(sql).Error; err != nil {
 			log.Panicf("update.error[%v]", err)
 		}
 

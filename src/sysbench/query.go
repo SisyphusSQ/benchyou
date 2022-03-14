@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"log"
 	"math"
@@ -66,29 +66,60 @@ func (q *Query) Query(worker *xworker.Worker, num int, id int) {
 	lo := bs * int64(id)
 	hi := bs * int64(id+1)
 
+	var (
+		cnt    int
+		t      = rand.Int31n(int32(worker.N))
+		cntSql = fmt.Sprintf("select count(*) from mybenchx%d", t)
+	)
+
+	err := session.Raw(cntSql).Scan(&cnt).Error
+	if err != nil {
+		log.Panicf("queryCount.error[%v]", err)
+	}
+
 	for !q.stop {
 		result := struct {
-			Id int `gorm:"column:id"`
-			K  string `gorm:"column:k"`
-			C  string `gorm:"column:c"`
-			Pad  string `gorm:"column:pad"`
+			Id        int       `gorm:"column:id"`
+			K         string    `gorm:"column:k"`
+			C         string    `gorm:"column:c"`
+			Pad       string    `gorm:"column:pad"`
+			CreatedAt time.Time `gorm:"column:created_at"`
+			UnixStamp int       `gorm:"column:unix_stamp"`
 		}{}
-		if q.conf.Random {
-			rid = xcommon.RandInt64(lo, hi)
-		} else {
-			rid = lo
-			lo++
-		}
 
-		table := rand.Int31n(int32(worker.N))
-		sql := fmt.Sprintf("SELECT * FROM benchyou%d WHERE id=%v", table, rid)
 		t := time.Now()
-		if err := session.Raw(sql).Scan(&result).Error; err != nil {
-			log.Panicf("query.error[%v]", err)
+		table := rand.Int31n(int32(worker.N))
+
+		switch q.conf.QueryType {
+		case "common":
+			if q.conf.Random {
+				rid = xcommon.RandInt64(lo, hi)
+			} else {
+				rid = lo
+				lo++
+			}
+
+			sql := fmt.Sprintf("SELECT * FROM mybenchx%d WHERE id=%v", table, rid)
+			if err := session.Debug().Raw(sql).Scan(&result).Error; err != nil {
+				log.Panicf("query.error[%v]", err)
+			}
+		case "time_stamp":
+			duration, _ := time.ParseDuration(fmt.Sprintf("%ds", cnt))
+
+			Loc, _ := time.LoadLocation("Asia/Shanghai")
+			timestamp := fmt.Sprintf(time.Now().Add(duration).In(Loc).Format("2006-01-02 15:04:05"))
+			sql := fmt.Sprintf("SELECT * FROM mybenchx%d WHERE created_at='%v'", table, timestamp)
+			if err := session.Debug().Raw(sql).Scan(&result).Error; err != nil {
+				log.Panicf("query.error[%v]", err)
+			}
+		case "unix_stamp":
+			stamp := rand.Int31n(int32(cnt))
+			sql := fmt.Sprintf("SELECT * FROM mybenchx%d WHERE unix_stamp=%v", table, time.Now().Unix()+int64(stamp))
+			if err := session.Debug().Raw(sql).Scan(&result).Error; err != nil {
+				log.Panicf("query.error[%v]", err)
+			}
 		}
 
-		// test
-		//fmt.Println(result)
 		elapsed := time.Since(t)
 
 		// stats

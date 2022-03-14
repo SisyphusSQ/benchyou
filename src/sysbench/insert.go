@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -79,9 +79,9 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 
 		table := rand.Int31n(int32(worker.N))
 		if insert.conf.Random {
-			sql = fmt.Sprintf("insert into benchyou%d(%s) values", table, columns2)
+			sql = fmt.Sprintf("insert into mybenchx%d(%s) values", table, columns2)
 		} else {
-			sql = fmt.Sprintf("insert into benchyou%d(%s) values", table, columns1)
+			sql = fmt.Sprintf("insert into mybenchx%d(%s) values", table, columns1)
 		}
 
 		// pack requests
@@ -136,7 +136,7 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 		if insert.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err = session.Exec(sql).Error; err != nil {
+		if err = tx.Exec(sql).Error; err != nil {
 			log.Panicf("insert.error[%v]", err)
 		}
 		// XA end.

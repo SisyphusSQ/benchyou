@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -78,7 +78,7 @@ func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
 			lo++
 		}
 		table := rand.Int31n(int32(worker.N))
-		sql = fmt.Sprintf("delete from benchyou%d where id=%v", table, id)
+		sql = fmt.Sprintf("delete from mybenchx%d where id=%v", table, id)
 
 		t := time.Now()
 		// Txn start.
@@ -95,7 +95,7 @@ func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
 		if delete.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err := session.Exec(sql).Error; err != nil {
+		if err := tx.Exec(sql).Error; err != nil {
 			log.Panicf("delete.error[%v]", err)
 		}
 

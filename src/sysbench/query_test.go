@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"testing"
 	"time"
 
@@ -59,11 +59,12 @@ func TestSysbenchNewQuery(t *testing.T) {
 		MysqlPort:        3306,
 		MysqlDb:          "sbtest",
 		MysqlTableEngine: "innodb",
-		OltpTablesCount:  64,
+		OltpTablesCount:  10,
 		ReadThreads:      10,
 		Random:           false,
 		RowsPerInsert:    20,
 		BatchPerCommit:   10,
+		QueryType:        "time_stamp",
 	}
 
 	workers := xworker.CreateWorkers(conf, 2)

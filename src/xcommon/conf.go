@@ -36,4 +36,5 @@ type Conf struct {
 	XA               bool
 	Random           bool
 	OltpTableSize    int
+	QueryType        string
 }

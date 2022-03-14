@@ -15,9 +15,9 @@
 package xcmd
 
 import (
-	"benchyou/src/sysbench"
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/sysbench"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -112,6 +112,9 @@ func parseConf(cmd *cobra.Command) (conf *xcommon.Conf, err error) {
 		return
 	}
 
+	if conf.QueryType, err = cmd.Flags().GetString("query-type"); err != nil {
+		return
+	}
 
 
 	xa := 0

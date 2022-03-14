@@ -10,7 +10,7 @@
 package sysbench
 
 import (
-	"benchyou/src/xworker"
+	"mybenchx/src/xworker"
 	"fmt"
 	"log"
 )
@@ -32,7 +32,7 @@ func (t *Table) Prepare() {
 	engine := t.workers[0].E
 
 	for i := 0; i < count; i++ {
-		sql := fmt.Sprintf(`create table benchyou%d (
+		sql := fmt.Sprintf(`create table mybenchx%d (
 							id bigint unsigned not null auto_increment,
 							k int not null default '0',
 							c varchar(120) not null default '',
@@ -48,7 +48,7 @@ func (t *Table) Prepare() {
 		if err := session.Exec(sql).Error; err != nil {
 			log.Panicf("creata.table.error[%v]", err)
 		}
-		log.Printf("create table benchyou%d(engine=%v) finished...\n", i, engine)
+		log.Printf("create table mybenchx%d(engine=%v) finished...\n", i, engine)
 	}
 }
 
@@ -61,11 +61,11 @@ func (t *Table) Cleanup() {
 	count := 64
 
 	for i := 0; i < count; i++ {
-		sql := fmt.Sprintf(`drop table benchyou%d;`, i)
+		sql := fmt.Sprintf(`drop table mybenchx%d;`, i)
 
 		if err := session.Exec(sql).Error; err != nil {
 			log.Panicf("drop.table.error[%v]", err)
 		}
-		log.Printf("drop table benchyou%d finished...\n", i)
+		log.Printf("drop table mybenchx%d finished...\n", i)
 	}
 }

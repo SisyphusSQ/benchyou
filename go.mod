@@ -1,4 +1,4 @@
-module benchyou
+module mybenchx
 
 go 1.17
 

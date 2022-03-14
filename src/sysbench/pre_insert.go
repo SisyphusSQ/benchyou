@@ -11,8 +11,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"log"
 	"math"
@@ -80,7 +80,7 @@ func (preInsert *PreInsert) Insert(worker *xworker.Worker, num, id int) {
 
 		var sql, value string
 
-		sql = fmt.Sprintf("insert into benchyou%d(%s) values", id, columns1)
+		sql = fmt.Sprintf("insert into mybenchx%d(%s) values", id, columns1)
 
 		pad := xcommon.RandString(xcommon.Padtemplate)
 		c := xcommon.RandString(xcommon.Ctemplate)
@@ -98,7 +98,7 @@ func (preInsert *PreInsert) Insert(worker *xworker.Worker, num, id int) {
 		)
 		buf.WriteString(value)
 
-		if i % 3000 == 0 || preInsert.conf.OltpTableSize - i == 0  {
+		if i%3000 == 0 || preInsert.conf.OltpTableSize-i == 0 {
 			// -1 to trim right ','
 			vals, err := buf.ReadString(buf.Length() - 1)
 			if err != nil {
@@ -113,11 +113,11 @@ func (preInsert *PreInsert) Insert(worker *xworker.Worker, num, id int) {
 			buf = common.NewBuffer(256)
 
 			elapsedLocal := time.Since(t)
-			log.Printf("[PROCESS] Table: benchyou%d insert num: %d cost time: %s sec\n", id, i, fmt.Sprintf("%+v", elapsedLocal.Seconds()))
+			log.Printf("[PROCESS] Table: mybenchx%d insert num: %d cost time: %s sec\n", id, i, fmt.Sprintf("%+v", elapsedLocal.Seconds()))
 		}
 	}
 
 	elapsed := time.Since(t)
-	log.Printf("[END] Table: benchyou%d cost time: %s sec\n", id, fmt.Sprintf("%+v", elapsed.Seconds()))
+	log.Printf("[END] Table: mybenchx%d cost time: %s sec\n", id, fmt.Sprintf("%+v", elapsed.Seconds()))
 	preInsert.lock.Done()
 }

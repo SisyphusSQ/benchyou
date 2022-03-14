@@ -10,7 +10,7 @@
 package xworker
 
 import (
-	"benchyou/src/xcommon"
+	"mybenchx/src/xcommon"
 	"fmt"
 	"gorm.io/gorm/logger"
 	"log"
@@ -71,7 +71,6 @@ func CreateWorkers(conf *xcommon.Conf, threads int) []Worker {
 			M: &Metric{},
 			E: conf.MysqlTableEngine,
 			N: conf.OltpTablesCount,
-
 		},
 		)
 	}

@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"testing"
 	"time"
 
@@ -91,7 +91,7 @@ func TestSysbenchNewUpdate(t *testing.T) {
 		MysqlDb:          "sbtest",
 		MysqlTableEngine: "innodb",
 		OltpTablesCount:  64,
-		UpdateThreads:      10,
+		UpdateThreads:    10,
 		Random:           true,
 		RowsPerInsert:    20,
 		BatchPerCommit:   10,

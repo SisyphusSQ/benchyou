@@ -10,9 +10,9 @@
 package xcmd
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xstat"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xstat"
+	"mybenchx/src/xworker"
 	"fmt"
 	"os"
 	"text/tabwriter"

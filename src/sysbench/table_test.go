@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,8 +39,8 @@ func TestPrepareTable(t *testing.T) {
 		MysqlPort:        3306,
 		MysqlDb:          "sbtest",
 		MysqlTableEngine: "innodb",
-		OltpTablesCount:  64,
-		OltpTableSize:    10,
+		OltpTablesCount:  10,
+		OltpTableSize:    10000,
 	}
 
 	// worker

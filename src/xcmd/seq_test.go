@@ -10,7 +10,7 @@
 package xcmd
 
 import (
-	"benchyou/src/xcommon"
+	"mybenchx/src/xcommon"
 	"testing"
 )
 
