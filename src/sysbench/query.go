@@ -10,12 +10,12 @@
 package sysbench
 
 import (
-	"mybenchx/src/xcommon"
-	"mybenchx/src/xworker"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -75,6 +75,10 @@ func (q *Query) Query(worker *xworker.Worker, num int, id int) {
 	err := session.Raw(cntSql).Scan(&cnt).Error
 	if err != nil {
 		log.Panicf("queryCount.error[%v]", err)
+	}
+
+	if cnt < 100000 {
+		cnt *= 2
 	}
 
 	for !q.stop {
