@@ -10,11 +10,13 @@
 package xworker
 
 import (
-	"benchyou/src/xcommon"
+	"mybenchx/src/xcommon"
 	"fmt"
+	"gorm.io/gorm/logger"
 	"log"
 
-	"github.com/xelabs/go-mysqlstack/driver"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 // Metric tuple.
@@ -32,7 +34,7 @@ type Metric struct {
 // Worker tuple.
 type Worker struct {
 	// session
-	S driver.Conn
+	S *gorm.DB
 
 	// mertric
 	M *Metric
@@ -50,15 +52,20 @@ type Worker struct {
 // CreateWorkers creates the new workers.
 func CreateWorkers(conf *xcommon.Conf, threads int) []Worker {
 	var workers []Worker
-	var conn driver.Conn
+	var conn *gorm.DB
 	var err error
 
-	utf8 := "utf8"
-	dsn := fmt.Sprintf("%s:%d", conf.MysqlHost, conf.MysqlPort)
+	//dsn := fmt.Sprintf("%s:%d", conf.MysqlHost, conf.MysqlPort)
+	dsn := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		conf.MysqlUser, conf.MysqlPassword, conf.MysqlHost, conf.MysqlPort, conf.MysqlDb)
 	for i := 0; i < threads; i++ {
-		if conn, err = driver.NewConn(conf.MysqlUser, conf.MysqlPassword, dsn, conf.MysqlDb, utf8); err != nil {
+
+		if conn, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		}); err != nil {
 			log.Panicf("create.worker.error:%v", err)
 		}
+
 		workers = append(workers, Worker{
 			S: conn,
 			M: &Metric{},
@@ -103,6 +110,11 @@ func AllWorkersMetric(workers []Worker) *Metric {
 // StopWorkers used to stop all the worker.
 func StopWorkers(workers []Worker) {
 	for _, worker := range workers {
-		worker.S.Close()
+		sqlDB, err := worker.S.DB()
+		sqlDB.Close()
+
+		if err != nil {
+			log.Panicf("close.worker.error:%v", err)
+		}
 	}
 }

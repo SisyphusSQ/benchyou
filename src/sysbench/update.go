@@ -10,9 +10,10 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"math"
 	"math/rand"
@@ -60,6 +61,7 @@ func (update *Update) Rows() uint64 {
 
 // Update used to execute the update query.
 func (update *Update) Update(worker *xworker.Worker, num int, id int) {
+	var tx *gorm.DB
 	session := worker.S
 	bs := int64(math.MaxInt64) / int64(num)
 	lo := bs * int64(id)
@@ -77,14 +79,15 @@ func (update *Update) Update(worker *xworker.Worker, num int, id int) {
 		}
 		c := xcommon.RandString(xcommon.Ctemplate)
 		table := rand.Int31n(int32(worker.N))
-		sql = fmt.Sprintf("update benchyou%d set c='%s' where id=%v", table, c, id)
+		sql = fmt.Sprintf("update mybenchx%d set c='%s' where id=%v", table, c, id)
 
 		t := time.Now()
 		// Txn start.
 		mod := worker.M.WNums % uint64(update.conf.BatchPerCommit)
 		if update.conf.BatchPerCommit > 1 {
 			if mod == 0 {
-				if err := session.Exec("begin"); err != nil {
+				tx = session.Begin()
+				if err := tx.Error; err != nil {
 					log.Panicf("update.error[%v]", err)
 				}
 			}
@@ -93,9 +96,10 @@ func (update *Update) Update(worker *xworker.Worker, num int, id int) {
 		if update.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err := session.Exec(sql); err != nil {
+		if err := tx.Exec(sql).Error; err != nil {
 			log.Panicf("update.error[%v]", err)
 		}
+
 		// XA end.
 		if update.conf.XA {
 			xaEnd(worker)
@@ -103,9 +107,7 @@ func (update *Update) Update(worker *xworker.Worker, num int, id int) {
 		// Txn end.
 		if update.conf.BatchPerCommit > 1 {
 			if mod == uint64(update.conf.BatchPerCommit-1) {
-				if err := session.Exec("commit"); err != nil {
-					log.Panicf("update.error[%v]", err)
-				}
+				tx.Commit()
 			}
 		}
 		elapsed := time.Since(t)

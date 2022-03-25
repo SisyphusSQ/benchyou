@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
 	"log"
 	"math"
@@ -66,16 +66,24 @@ func (r *Range) Query(worker *xworker.Worker, num int, id int) {
 	hi := bs * int64(id+1)
 
 	for !r.stop {
+		result := struct {
+			Id  int    `gorm:"column:id"`
+			K   string `gorm:"column:k"`
+			C   string `gorm:"column:c"`
+			Pad string `gorm:"column:pad"`
+		}{}
+
 		lower := xcommon.RandInt64(lo, hi)
 		upper := xcommon.RandInt64(lower, hi)
 
 		table := rand.Int31n(int32(worker.N))
-		sql := fmt.Sprintf("SELECT * FROM benchyou%d WHERE id BETWEEN %d AND %d ORDER BY id %v LIMIT 100",
+		sql := fmt.Sprintf("SELECT * FROM mybenchx%d WHERE id BETWEEN %d AND %d ORDER BY id %v LIMIT 100",
 			table, lower, upper, r.order)
 		t := time.Now()
-		if err := session.Exec(sql); err != nil {
+		if err := session.Raw(sql).Scan(&result).Error; err != nil {
 			log.Panicf("range.error[%v]", err)
 		}
+
 		elapsed := time.Since(t)
 
 		// stats

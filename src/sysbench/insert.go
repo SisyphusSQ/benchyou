@@ -10,9 +10,10 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"math"
 	"math/rand"
@@ -62,14 +63,15 @@ func (insert *Insert) Rows() uint64 {
 
 // Insert used to execute the insert query.
 func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
+	var tx *gorm.DB
 	session := worker.S
 	bs := int64(math.MaxInt64) / int64(num)
 	lo := bs * int64(id)
 	hi := bs * int64(id+1)
-	columns1 := "k,c,pad"
-	columns2 := "k,c,pad,id"
-	valfmt1 := "(%v,'%s', '%s'),"
-	valfmt2 := "(%v,'%s', '%s', %v),"
+	columns1 := "k,c,pad,created_at,unix_stamp"
+	columns2 := "k,c,pad,id,created_at,unix_stamp"
+	valfmt1 := "(%v,'%s', '%s', '%s', %d),"
+	valfmt2 := "(%v,'%s', '%s', %v, '%s', %d),"
 
 	for !insert.stop {
 		var sql, value string
@@ -77,9 +79,9 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 
 		table := rand.Int31n(int32(worker.N))
 		if insert.conf.Random {
-			sql = fmt.Sprintf("insert into benchyou%d(%s) values", table, columns2)
+			sql = fmt.Sprintf("insert into mybenchx%d(%s) values", table, columns2)
 		} else {
-			sql = fmt.Sprintf("insert into benchyou%d(%s) values", table, columns1)
+			sql = fmt.Sprintf("insert into mybenchx%d(%s) values", table, columns1)
 		}
 
 		// pack requests
@@ -87,20 +89,29 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 			pad := xcommon.RandString(xcommon.Padtemplate)
 			c := xcommon.RandString(xcommon.Ctemplate)
 
+			Loc, _ := time.LoadLocation("Asia/Shanghai")
+			unixStamp := time.Now().Unix() + rand.Int63n(86400)
+			createdAt := fmt.Sprintf(time.Unix(unixStamp, 0).In(Loc).Format("2006-01-02 15:04:05"))
+
 			if insert.conf.Random {
 				value = fmt.Sprintf(valfmt2,
 					xcommon.RandInt64(lo, hi),
 					c,
 					pad,
 					xcommon.RandInt64(lo, hi),
+					createdAt,
+					int32(unixStamp),
 				)
 			} else {
 				value = fmt.Sprintf(valfmt1,
 					xcommon.RandInt64(lo, hi),
 					c,
 					pad,
+					createdAt,
+					int32(unixStamp),
 				)
 			}
+			//fmt.Println(value)
 			buf.WriteString(value)
 		}
 		// -1 to trim right ','
@@ -115,7 +126,8 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 		mod := worker.M.WNums % uint64(insert.conf.BatchPerCommit)
 		if insert.conf.BatchPerCommit > 1 {
 			if mod == 0 {
-				if err := session.Exec("begin"); err != nil {
+				tx = session.Begin()
+				if err = tx.Error; err != nil {
 					log.Panicf("insert.error[%v]", err)
 				}
 			}
@@ -124,7 +136,7 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 		if insert.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err := session.Exec(sql); err != nil {
+		if err = tx.Exec(sql).Error; err != nil {
 			log.Panicf("insert.error[%v]", err)
 		}
 		// XA end.
@@ -134,9 +146,7 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 		// Txn end.
 		if insert.conf.BatchPerCommit > 1 {
 			if mod == uint64(insert.conf.BatchPerCommit-1) {
-				if err := session.Exec("commit"); err != nil {
-					log.Panicf("insert.error[%v]", err)
-				}
+				tx.Commit()
 			}
 		}
 		elapsed := time.Since(t)
@@ -165,7 +175,7 @@ func xaStart(worker *xworker.Worker, hi int64, lo int64) {
 	session := worker.S
 	worker.XID = fmt.Sprintf("BXID-%v-%v", time.Now().Format("20060102150405"), (rand.Int63n(hi-lo) + lo))
 	start := fmt.Sprintf("xa start '%s'", worker.XID)
-	if err := session.Exec(start); err != nil {
+	if err := session.Exec(start).Error; err != nil {
 		log.Panicf("xa.start..error[%v]", err)
 	}
 }
@@ -173,15 +183,15 @@ func xaStart(worker *xworker.Worker, hi int64, lo int64) {
 func xaEnd(worker *xworker.Worker) {
 	session := worker.S
 	end := fmt.Sprintf("xa end '%s'", worker.XID)
-	if err := session.Exec(end); err != nil {
+	if err := session.Exec(end).Error; err != nil {
 		log.Panicf("xa.end.error[%v]", err)
 	}
 	prepare := fmt.Sprintf("xa prepare '%s'", worker.XID)
-	if err := session.Exec(prepare); err != nil {
+	if err := session.Exec(prepare).Error; err != nil {
 		log.Panicf("xa.prepare.error[%v]", err)
 	}
 	commit := fmt.Sprintf("xa commit '%s'", worker.XID)
-	if err := session.Exec(commit); err != nil {
+	if err := session.Exec(commit).Error; err != nil {
 		log.Panicf("xa.commit.error[%v]", err)
 	}
 }

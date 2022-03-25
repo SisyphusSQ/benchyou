@@ -10,9 +10,10 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"math"
 	"math/rand"
@@ -60,6 +61,7 @@ func (delete *Delete) Rows() uint64 {
 
 // Delete used to execute delete query.
 func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
+	var tx *gorm.DB
 	session := worker.S
 	bs := int64(math.MaxInt64) / int64(num)
 	lo := bs * int64(id)
@@ -76,14 +78,15 @@ func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
 			lo++
 		}
 		table := rand.Int31n(int32(worker.N))
-		sql = fmt.Sprintf("delete from benchyou%d where id=%v", table, id)
+		sql = fmt.Sprintf("delete from mybenchx%d where id=%v", table, id)
 
 		t := time.Now()
 		// Txn start.
 		mod := worker.M.WNums % uint64(delete.conf.BatchPerCommit)
 		if delete.conf.BatchPerCommit > 1 {
 			if mod == 0 {
-				if err := session.Exec("begin"); err != nil {
+				tx = session.Begin()
+				if err := tx.Error; err != nil {
 					log.Panicf("delete.error[%v]", err)
 				}
 			}
@@ -92,9 +95,10 @@ func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
 		if delete.conf.XA {
 			xaStart(worker, hi, lo)
 		}
-		if err := session.Exec(sql); err != nil {
+		if err := tx.Exec(sql).Error; err != nil {
 			log.Panicf("delete.error[%v]", err)
 		}
+
 		// XA end.
 		if delete.conf.XA {
 			xaEnd(worker)
@@ -102,9 +106,7 @@ func (delete *Delete) Delete(worker *xworker.Worker, num int, id int) {
 		// Txn end.
 		if delete.conf.BatchPerCommit > 1 {
 			if mod == uint64(delete.conf.BatchPerCommit-1) {
-				if err := session.Exec("commit"); err != nil {
-					log.Panicf("delete.error[%v]", err)
-				}
+				tx.Commit()
 			}
 		}
 		elapsed := time.Since(t)

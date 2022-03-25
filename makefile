@@ -2,12 +2,12 @@ export GOPATH := $(shell pwd)
 export PATH := $(GOPATH)/bin:$(PATH)
 
 build:
-	@echo "--> go get..."
-	go get github.com/xelabs/go-mysqlstack/driver
+	@echo "--> go mod tidy..."
+	go mod tidy
 
 	@echo "--> Building..."
 	@mkdir -p bin/
-	go build -v -o bin/benchyou src/bench/benchyou.go
+	go build -v -o bin/mybenchx src/bench/mybenchx.go
 	@chmod 755 bin/*
 
 clean:

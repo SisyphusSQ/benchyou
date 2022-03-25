@@ -10,8 +10,8 @@
 package sysbench
 
 import (
-	"benchyou/src/xcommon"
-	"benchyou/src/xworker"
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 	"testing"
 	"time"
 
@@ -75,6 +75,31 @@ func TestSysbenchXADelete(t *testing.T) {
 
 	workers := xworker.CreateWorkers(conf, 2)
 	assert.NotNil(t, workers)
+	job := NewDelete(conf, workers)
+	job.Run()
+	time.Sleep(time.Millisecond * 100)
+	job.Stop()
+	assert.True(t, job.Rows() > 0)
+}
+
+func TestSysbenchNewDelete(t *testing.T) {
+	conf := &xcommon.Conf{
+		MysqlHost:        "127.0.0.1",
+		MysqlUser:        "root",
+		MysqlPassword:    "root",
+		MysqlPort:        3306,
+		MysqlDb:          "sbtest",
+		MysqlTableEngine: "innodb",
+		OltpTablesCount:  64,
+		DeleteThreads:    10,
+		Random:           true,
+		RowsPerInsert:    20,
+		BatchPerCommit:   10,
+	}
+
+	workers := xworker.CreateWorkers(conf, 2)
+	assert.NotNil(t, workers)
+
 	job := NewDelete(conf, workers)
 	job.Run()
 	time.Sleep(time.Millisecond * 100)

@@ -25,6 +25,11 @@ func RandInt64(min int64, max int64) int64 {
 	return min + int64(rand.Int63n(int64(max-min)))
 }
 
+// RandInt32 rands the int65 between min and max.
+func RandInt32(min int32, max int32) int32 {
+	return min + int32(rand.Int31n(int32(max-min)))
+}
+
 // RandString rands the strings format by template.
 func RandString(template string) string {
 	nums := "0123456789"

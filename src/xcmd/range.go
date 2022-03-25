@@ -10,8 +10,8 @@
 package xcmd
 
 import (
-	"benchyou/src/sysbench"
-	"benchyou/src/xworker"
+	"mybenchx/src/sysbench"
+	"mybenchx/src/xworker"
 	"github.com/spf13/cobra"
 	"time"
 )

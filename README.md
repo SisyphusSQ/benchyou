@@ -1,12 +1,27 @@
-[![Build Status](https://travis-ci.org/xelabs/benchyou.svg?branch=master)](https://travis-ci.org/xelabs/benchyou) [![Go Report Card](https://goreportcard.com/badge/github.com/xelabs/benchyou)](https://goreportcard.com/report/github.com/xelabs/benchyou)  [![codecov.io](https://codecov.io/gh/xelabs/benchyou/graphs/badge.svg)](https://codecov.io/gh/xelabs/benchyou/branch/master)
+## mybenchx
 
-## benchyou
-
-benchyou is a benchmark tool for MySQL, similar Sysbench.
+mybenchx is a benchmark tool for MySQL, similar Sysbench.
 
 In addition to real-time monitoring TPS, she also monitors vmstat/iostat via SSH tunnel.
 
+Forked from [xelabs/benchyou](https://github.com/xelabs/benchyou)
+
+Thanks For xelabs.
+
 The idea of stat per operation is inspired by Mark Callaghan, [Small Datum](http://smalldatum.blogspot.com)
+
+## Add feature
+- Feature: `prepare` with `oltp-table-size` option to fill up tables.
+- Query efficiency contrast between `datetime` and `unix_stamp`
+
+## Bug fix
+- Replace mysql driver from `go-mysqlstack` to `gorm` , due to fix `MySQL 8.0.x support`
+
+## ToDo
+- [x] Query efficiency contrast between `datetime` and `unix_stamp`
+- [ ] XA support
+- [ ] mode select
+
 
 ## Screenshots
 ```
@@ -68,21 +83,12 @@ r-rsp:        the response time of one read  operation,  in millisecond
 total-number: the total number events
 ```
 
-## Build
-
-```
-$git clone https://github.com/xelabs/benchyou
-$cd benchyou
-$make build
-$./bin/benchyou -h
-```
-
 ## Usage
 
 ```
-$ ./bin/benchyou -h
+$ ./bin/bench -h
 Usage:
-  benchyou [command]
+  mybenchx [command]
 
 Available Commands:
   prepare
@@ -90,59 +96,130 @@ Available Commands:
   random
   seq
   range
+  help        Help about any command
+  completion  Generate the autocompletion script for the specified shell
 
 Flags:
-      --read-threads int            number of read threads to use(Default 32) (default 32)
-      --write-threads int           number of write threads to use(Default 32) (default 32)
-      --update-threads int          number of update threads to use(Default 0)
+      --batch-per-commit int        #rows per transaction(Default 1) (default 1)
       --delete-threads int          number of delete threads to use(Default 0)
+  -h, --help                        help for mybenchx
       --max-request uint            limit for total requests, including write and read(Default 0, means no limits)
       --max-time int                limit for total execution time in seconds(Default 3600) (default 3600)
       --mysql-db string             MySQL database name(Default sbtest) (default "sbtest")
       --mysql-enable-xa int         enable MySQL xa transaction for insertion {0|1} (Default 0)
       --mysql-host string           MySQL server host(Default NULL)
-      --mysql-password string       MySQL password(Default benchyou) (default "benchyou")
+      --mysql-password string       MySQL password(Default mybenchx) (default "mybenchx")
       --mysql-port int              MySQL server port(Default 3306) (default 3306)
       --mysql-range-order string    range query sort the result-set in {ASC|DESC} (Default ASC) (default "ASC")
-      --mysql-table-engine string   storage engine to use for the test table {tokudb,innodb,...}(Default innodb) (default "innodb")
-      --mysql-user string           MySQL user(Default benchyou) (default "benchyou")
+      --mysql-table-engine string   storage engine to use for the test table {tokudb,innodb,...} (default "innodb")
+      --mysql-user string           MySQL user(Default mybenchx) (default "mybenchx")
+      --oltp-table-size int         If not specify, will not fill up table
       --oltp-tables-count int       number of tables to create(Default 8) (default 8)
+      --read-threads int            number of read threads to use(Default 32) (default 32)
       --rows-per-insert int         #rows per insert(Default 1) (default 1)
-      --batch-per-commit int        #rows per transaction(Default 1) (default 1)
       --ssh-host string             SSH server host(Default NULL, same as mysql-host)
-      --ssh-password string         SSH server password(Default benchyou) (default "benchyou")
+      --ssh-password string         SSH server password(Default mybenchx) (default "mybenchx")
       --ssh-port int                SSH server port(Default 22) (default 22)
       --ssh-user string             SSH server user(Default benchyou) (default "benchyou")
+      --update-threads int          number of update threads to use(Default 0)
+      --write-threads int           number of write threads to use(Default 32) (default 32)
+
+Use "mybenchx [command] --help" for more information about a command.
 ```
 
 ## Examples
 
 ```
 prepare 64 tables:
-./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou  --oltp-tables-count=64 prepare
+./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx  --oltp-tables-count=64 prepare
 
 cleanup 64 tables:
-./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou  --oltp-tables-count=64 cleanup
+./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx  --oltp-tables-count=64 cleanup
 
 random insert(Write/Read Ratio=128:8):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 random
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 random
 
 sequential insert(Write/Read Ratio=128:8):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 seq
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 seq
 
 mix(Write/Read/Update/Delete Ratio=4:4:4:4):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --write-threads=4 --read-threads=4 --update-threads=4 --delete-threads=4 --max-time=3600 random
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --write-threads=4 --read-threads=4 --update-threads=4 --delete-threads=4 --max-time=3600 random
 
 insert multiple rows(10 rows per insert):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --write-threads=4 --rows-per-insert=10 --max-time=3600 random
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --write-threads=4 --rows-per-insert=10 --max-time=3600 random
 
 batch update(10 rows per transaction):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --update-threads=4 --batch-per-commit=10 --max-time=3600 random
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --update-threads=4 --batch-per-commit=10 --max-time=3600 random
 
 query-range(Write/Read Ratio=128:8):
- ./bin/benchyou  --mysql-host=192.168.0.3 --mysql-user=benchyou --mysql-password=benchyou --ssh-user=benchyou --ssh-password=benchyou --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 --mysql-range-order=DESC range
+ ./bin/mybenchx  --mysql-host=10.3.2.1 --mysql-user=mybenchx --mysql-password=mybenchx --ssh-user=mybenchx --ssh-password=mybenchx --oltp-tables-count=64 --write-threads=128 --read-threads=8 --max-time=3600 --mysql-range-order=DESC range
 ```
 
+## `Prepare` efficiency compare with `sysbench`
+Performance Of VM   
+CPU cores : 2  
+Memory total : 4G
+
+```bash
+$ ./bench --mysql-host=127.0.0.1 --mysql-user=root --mysql-password=root \
+> --oltp-tables-count=10 --oltp-table-size=100000 prepare
+2022/03/04 17:46:20 create table mybenchx0(engine=innodb) finished...
+2022/03/04 17:46:20 create table mybenchx1(engine=innodb) finished...
+2022/03/04 17:46:21 create table mybenchx2(engine=innodb) finished...
+2022/03/04 17:46:22 create table mybenchx3(engine=innodb) finished...
+2022/03/04 17:46:22 create table mybenchx4(engine=innodb) finished...
+2022/03/04 17:46:23 create table mybenchx5(engine=innodb) finished...
+2022/03/04 17:46:24 create table mybenchx6(engine=innodb) finished...
+2022/03/04 17:46:25 create table mybenchx7(engine=innodb) finished...
+2022/03/04 17:46:25 create table mybenchx8(engine=innodb) finished...
+2022/03/04 17:46:26 create table mybenchx9(engine=innodb) finished...
+...
+2022/03/04 17:49:36 [END] Table: mybenchx7 cost time: 189.574623194 sec
+2022/03/04 17:49:36 [PROCESS] Table: mybenchx6 insert num: 99000 cost time: 189.829763464 sec
+2022/03/04 17:49:37 [PROCESS] Table: mybenchx2 insert num: 99000 cost time: 190.861349855 sec
+2022/03/04 17:49:38 [PROCESS] Table: mybenchx6 insert num: 100000 cost time: 191.215371057 sec
+2022/03/04 17:49:38 [END] Table: mybenchx6 cost time: 191.215429047 sec
+2022/03/04 17:49:38 [PROCESS] Table: mybenchx2 insert num: 100000 cost time: 191.89571655 sec
+2022/03/04 17:49:38 [END] Table: mybenchx2 cost time: 191.895827813 sec
+
+$ sysbench ./tests/include/oltp_legacy/oltp.lua --mysql-host=127.0.0.1 --mysql-port=3306 \
+> --mysql-user=root --mysql-password=root --oltp-test-mode=complex --oltp-tables-count=10 \
+> --oltp-table-size=100000 --threads=10 --time=120 --report-interval=10 prepare
+sysbench 1.0.20 (using bundled LuaJIT 2.1.0-beta2)
+
+Creating table 'sbtest1'...
+Inserting 100000 records into 'sbtest1'
+Creating secondary indexes on 'sbtest1'...
+Creating table 'sbtest2'...
+Inserting 100000 records into 'sbtest2'
+Creating secondary indexes on 'sbtest2'...
+Creating table 'sbtest3'...
+Inserting 100000 records into 'sbtest3'
+Creating secondary indexes on 'sbtest3'...
+Creating table 'sbtest4'...
+Inserting 100000 records into 'sbtest4'
+Creating secondary indexes on 'sbtest4'...
+Creating table 'sbtest5'...
+Inserting 100000 records into 'sbtest5'
+Creating secondary indexes on 'sbtest5'...
+Creating table 'sbtest6'...
+Inserting 100000 records into 'sbtest6'
+Creating secondary indexes on 'sbtest6'...
+Creating table 'sbtest7'...
+Inserting 100000 records into 'sbtest7'
+Creating secondary indexes on 'sbtest7'...
+Creating table 'sbtest8'...
+Inserting 100000 records into 'sbtest8'
+Creating secondary indexes on 'sbtest8'...
+Creating table 'sbtest9'...
+Inserting 100000 records into 'sbtest9'
+Creating secondary indexes on 'sbtest9'...
+Creating table 'sbtest10'...
+Inserting 100000 records into 'sbtest10'
+Creating secondary indexes on 'sbtest10'...
+Total Time: 416s
+```
+ 
 ## License
 
-benchyou is released under the GPLv3. See LICENSE
+mybenchx is released under the GPLv3. See LICENSE

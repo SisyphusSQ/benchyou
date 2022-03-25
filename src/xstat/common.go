@@ -11,6 +11,7 @@ package xstat
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -30,6 +31,9 @@ func sshConnect(user, password, host string, port int) (client *ssh.Client, err 
 	sshConfig := &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{ssh.Password(password)},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
+		},
 	}
 
 	dsn := fmt.Sprintf("%s:%d", host, port)

@@ -10,7 +10,7 @@
 package xstat
 
 import (
-	"benchyou/src/xcommon"
+	"mybenchx/src/xcommon"
 	"fmt"
 	"log"
 	"strconv"
