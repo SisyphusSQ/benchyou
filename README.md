@@ -12,15 +12,15 @@ The idea of stat per operation is inspired by Mark Callaghan, [Small Datum](http
 
 ## Add feature
 - Feature: `prepare` with `oltp-table-size` option to fill up tables.
-- Query efficiency contrast between `datetime` and `unix_stamp`
+- Feature: add `select` mode : `common`,`time_stamp`,`unix_stamp` 
 
 ## Bug fix
 - Replace mysql driver from `go-mysqlstack` to `gorm` , due to fix `MySQL 8.0.x support`
 
 ## ToDo
+- [x] mode select
 - [x] Query efficiency contrast between `datetime` and `unix_stamp`
 - [ ] XA support
-- [ ] mode select
 
 
 ## Screenshots
@@ -91,11 +91,11 @@ Usage:
   mybenchx [command]
 
 Available Commands:
-  prepare
-  cleanup
-  random
-  seq
-  range
+  prepare     
+  cleanup     
+  random      
+  seq         
+  range       
   help        Help about any command
   completion  Generate the autocompletion script for the specified shell
 
@@ -113,14 +113,15 @@ Flags:
       --mysql-range-order string    range query sort the result-set in {ASC|DESC} (Default ASC) (default "ASC")
       --mysql-table-engine string   storage engine to use for the test table {tokudb,innodb,...} (default "innodb")
       --mysql-user string           MySQL user(Default mybenchx) (default "mybenchx")
-      --oltp-table-size int         If not specify, will not fill up table
+      --oltp-table-size int         If not specify, will not fill up table 
       --oltp-tables-count int       number of tables to create(Default 8) (default 8)
+      --query-type string           Query type which [common,time_stamp,unix_stamp] to use (default "common")
       --read-threads int            number of read threads to use(Default 32) (default 32)
       --rows-per-insert int         #rows per insert(Default 1) (default 1)
       --ssh-host string             SSH server host(Default NULL, same as mysql-host)
       --ssh-password string         SSH server password(Default mybenchx) (default "mybenchx")
       --ssh-port int                SSH server port(Default 22) (default 22)
-      --ssh-user string             SSH server user(Default benchyou) (default "benchyou")
+      --ssh-user string             SSH server user(Default mybenchx) (default "mybenchx")
       --update-threads int          number of update threads to use(Default 0)
       --write-threads int           number of write threads to use(Default 32) (default 32)
 
