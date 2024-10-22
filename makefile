@@ -1,13 +1,13 @@
-export GOPATH := $(shell pwd)
-export PATH := $(GOPATH)/bin:$(PATH)
-
 build:
-	@echo "--> go mod tidy..."
-	go mod tidy
-
 	@echo "--> Building..."
 	@mkdir -p bin/
-	go build -v -o bin/mybenchx src/bench/mybenchx.go
+	GOARCH=amd64 GOOS=linux go build -o bin/mybenchx src/bench/mybenchx.go
+	@chmod 755 bin/*
+
+darwin:
+	@echo "--> Building..."
+	@mkdir -p bin/
+	go build -o bin/mybenchx src/bench/mybenchx.go
 	@chmod 755 bin/*
 
 clean:

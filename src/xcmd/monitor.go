@@ -10,10 +10,10 @@
 package xcmd
 
 import (
+	"fmt"
 	"mybenchx/src/xcommon"
 	"mybenchx/src/xstat"
 	"mybenchx/src/xworker"
-	"fmt"
 	"os"
 	"text/tabwriter"
 	"time"
@@ -51,41 +51,50 @@ type Monitor struct {
 
 // NewMonitor creates the new monitor.
 func NewMonitor(conf *xcommon.Conf, workers []xworker.Worker) *Monitor {
-	return &Monitor{
-		conf:    conf,
-		workers: workers,
-		ticker:  time.NewTicker(time.Second),
-		vms:     xstat.NewVMS(conf),
-		ios:     xstat.NewIOS(conf),
-		stats:   &Stats{},
-		all:     &Stats{},
+	m := new(Monitor)
+
+	if !conf.IsRDS {
+		m.vms = xstat.NewVMS(conf)
+		m.ios = xstat.NewIOS(conf)
 	}
+	m.conf = conf
+	m.workers = workers
+	m.ticker = time.NewTicker(time.Second)
+	m.stats = new(Stats)
+	m.all = new(Stats)
+
+	return m
 }
 
 // Start used to start the monitor.
 func (m *Monitor) Start() {
 	w := tabwriter.NewWriter(os.Stdout, 4, 4, 2, ' ', 0)
-	m.vms.Start()
-	m.ios.Start()
+
+	if !m.conf.IsRDS {
+		m.vms.Start()
+		m.ios.Start()
+	}
 	go func() {
 		newm := &xworker.Metric{}
 		oldm := &xworker.Metric{}
-		for _ = range m.ticker.C {
+		for range m.ticker.C {
 			m.seconds++
-			m.stats.SystemCS = m.vms.Stat.SystemCS
-			m.stats.IdleCPU = m.vms.Stat.IdleCPU
-			m.stats.MemFree = m.vms.Stat.MemFree
-			m.stats.MemCache = m.vms.Stat.MemCache
-			m.stats.SwapSi = m.vms.Stat.SwapSi
-			m.stats.SwapSo = m.vms.Stat.SwapSo
-			m.stats.RRQM_S = m.ios.Stat.RRQM_S
-			m.stats.WRQM_S = m.ios.Stat.WRQM_S
-			m.stats.RS = m.ios.Stat.RS
-			m.stats.WS = m.ios.Stat.WS
-			m.stats.RKB_S = m.ios.Stat.RKB_S
-			m.stats.WKB_S = m.ios.Stat.WKB_S
-			m.stats.AWAIT = m.ios.Stat.AWAIT
-			m.stats.UTIL = m.ios.Stat.UTIL
+			if !m.conf.IsRDS {
+				m.stats.SystemCS = m.vms.Stat.SystemCS
+				m.stats.IdleCPU = m.vms.Stat.IdleCPU
+				m.stats.MemFree = m.vms.Stat.MemFree
+				m.stats.MemCache = m.vms.Stat.MemCache
+				m.stats.SwapSi = m.vms.Stat.SwapSi
+				m.stats.SwapSo = m.vms.Stat.SwapSo
+				m.stats.RRQM_S = m.ios.Stat.RRQM_S
+				m.stats.WRQM_S = m.ios.Stat.WRQM_S
+				m.stats.RS = m.ios.Stat.RS
+				m.stats.WS = m.ios.Stat.WS
+				m.stats.RKB_S = m.ios.Stat.RKB_S
+				m.stats.WKB_S = m.ios.Stat.WKB_S
+				m.stats.AWAIT = m.ios.Stat.AWAIT
+				m.stats.UTIL = m.ios.Stat.UTIL
+			}
 
 			m.all.SystemCS += m.stats.SystemCS
 			m.all.IdleCPU += m.stats.IdleCPU
@@ -105,32 +114,50 @@ func (m *Monitor) Start() {
 			rcosts := float64(newm.QCosts - oldm.QCosts)
 			tps := wtps + rtps
 
-			fmt.Fprintln(w, "time   \t\t   thds  \t tps   \twtps  \trtps  \trio  \trio/op \twio  \twio/op  \trMB   \trKB/op  \twMB   \twKB/op \tcpu/op\tfreeMB\tcacheMB\t w-rsp(ms)\tr-rsp(ms)\t  total-number")
-			line := fmt.Sprintf("[%ds]\t\t[r:%d,w:%d,u:%d,d:%d]\t%d\t%d\t%d\t%d\t%.2f\t%d\t%0.2f\t%2.2f\t%.2f\t%2.2f\t%.2f\t%.2f\t%d\t%d\t %.2f\t%.2f\t  %v\n",
-				m.seconds,
-				m.conf.ReadThreads,
-				m.conf.WriteThreads,
-				m.conf.UpdateThreads,
-				m.conf.DeleteThreads,
-				int(tps),
-				int(wtps),
-				int(rtps),
-				int(m.stats.RS),
-				m.stats.RS/tps,
-				int(m.stats.WS),
-				m.stats.WS/tps,
-				m.stats.RKB_S/1024,
-				m.stats.RKB_S/tps,
-				m.stats.WKB_S/1024,
-				m.stats.WKB_S/tps,
-				float64(m.stats.SystemCS)/tps,
-				int(m.stats.MemFree),
-				int(m.stats.MemCache),
-				float64(wcosts)/1e6/wtps,
-				float64(rcosts)/1e6/rtps,
-				(newm.WNums + newm.QNums),
-			)
-			fmt.Fprintln(w, line)
+			if !m.conf.IsRDS {
+				fmt.Fprintln(w, "time   \t\t   thds  \t tps   \twtps  \trtps  \trio  \trio/op \twio  \twio/op  \trMB   \trKB/op  \twMB   \twKB/op \tcpu/op\tfreeMB\tcacheMB\t w-rsp(ms)\tr-rsp(ms)\t  total-number")
+				line := fmt.Sprintf("[%ds]\t\t[r:%d,w:%d,u:%d,d:%d]\t%d\t%d\t%d\t%d\t%.2f\t%d\t%0.2f\t%2.2f\t%.2f\t%2.2f\t%.2f\t%.2f\t%d\t%d\t %.2f\t%.2f\t  %v\n",
+					m.seconds,
+					m.conf.ReadThreads,
+					m.conf.WriteThreads,
+					m.conf.UpdateThreads,
+					m.conf.DeleteThreads,
+					int(tps),
+					int(wtps),
+					int(rtps),
+					int(m.stats.RS),
+					m.stats.RS/tps,
+					int(m.stats.WS),
+					m.stats.WS/tps,
+					m.stats.RKB_S/1024,
+					m.stats.RKB_S/tps,
+					m.stats.WKB_S/1024,
+					m.stats.WKB_S/tps,
+					float64(m.stats.SystemCS)/tps,
+					int(m.stats.MemFree),
+					int(m.stats.MemCache),
+					float64(wcosts)/1e6/wtps,
+					float64(rcosts)/1e6/rtps,
+					newm.WNums+newm.QNums,
+				)
+				fmt.Fprintln(w, line)
+			} else {
+				fmt.Fprintln(w, "time   \t\t   thds  \t tps   \twtps  \trtps  \t w-rsp(ms)\tr-rsp(ms)\t  total-number")
+				line := fmt.Sprintf("[%ds]\t\t[r:%d,w:%d,u:%d,d:%d]\t%d\t%d\t%d\t %.2f\t%.2f\t  %v\n",
+					m.seconds,
+					m.conf.ReadThreads,
+					m.conf.WriteThreads,
+					m.conf.UpdateThreads,
+					m.conf.DeleteThreads,
+					int(tps),
+					int(wtps),
+					int(rtps),
+					float64(wcosts)/1e6/wtps,
+					float64(rcosts)/1e6/rtps,
+					newm.WNums+newm.QNums,
+				)
+				fmt.Fprintln(w, line)
+			}
 
 			w.Flush()
 			*oldm = *newm
@@ -152,29 +179,49 @@ func (m *Monitor) Stop() {
 	events := writes + reads
 
 	fmt.Fprintln(w, "----------------------------------------------------------------------------------------------avg---------------------------------------------------------------------------------------------")
-	fmt.Fprintln(w, "time   \t\t tps   \twtps  \trtps  \trio  \trio/op \twio  \twio/op  \trMB   \trKB/op  \twMB   \twKB/op \tcpu/op\t          w-rsp(ms)\t          r-rsp(ms)              total-number")
-	line := fmt.Sprintf("[%ds]\t\t%d\t%d\t%d\t%d\t%.2f\t%d\t%0.2f\t%2.2f\t%.2f\t%2.2f\t%.2f\t%.2f\t[avg:%.2f,min:%.2f,max:%.2f]\t[avg:%.2f,min:%.2f,max:%.2f]\t    %v\n",
-		m.seconds,
-		int(events/seconds),
-		int(writes/seconds),
-		int(reads/seconds),
-		int(m.stats.RS/seconds),
-		m.stats.RS/events,
-		int(m.stats.WS/seconds),
-		m.stats.WS/events/seconds,
-		m.stats.RKB_S/1024/seconds,
-		m.stats.RKB_S/events/seconds,
-		m.stats.WKB_S/1024/seconds,
-		m.stats.WKB_S/events/seconds,
-		float64(m.stats.SystemCS)/events/seconds,
-		float64(all.WCosts)/1e6/writes/seconds,
-		float64(all.WMin)/1e6,
-		float64(all.WMax)/1e6,
-		float64(all.QCosts)/1e6/reads/seconds,
-		float64(all.QMin)/1e6,
-		float64(all.QMax)/1e6,
-		(all.WNums + all.QNums),
-	)
-	fmt.Fprintln(w, line)
+
+	if !m.conf.IsRDS {
+		fmt.Fprintln(w, "time   \t\t tps   \twtps  \trtps  \trio  \trio/op \twio  \twio/op  \trMB   \trKB/op  \twMB   \twKB/op \tcpu/op\t          w-rsp(ms)\t          r-rsp(ms)              total-number")
+		line := fmt.Sprintf("[%ds]\t\t%d\t%d\t%d\t%d\t%.2f\t%d\t%0.2f\t%2.2f\t%.2f\t%2.2f\t%.2f\t%.2f\t[avg:%.2f,min:%.2f,max:%.2f]\t[avg:%.2f,min:%.2f,max:%.2f]\t    %v\n",
+			m.seconds,
+			int(events/seconds),
+			int(writes/seconds),
+			int(reads/seconds),
+			int(m.stats.RS/seconds),
+			m.stats.RS/events,
+			int(m.stats.WS/seconds),
+			m.stats.WS/events/seconds,
+			m.stats.RKB_S/1024/seconds,
+			m.stats.RKB_S/events/seconds,
+			m.stats.WKB_S/1024/seconds,
+			m.stats.WKB_S/events/seconds,
+			float64(m.stats.SystemCS)/events/seconds,
+			float64(all.WCosts)/1e6/writes/seconds,
+			float64(all.WMin)/1e6,
+			float64(all.WMax)/1e6,
+			float64(all.QCosts)/1e6/reads/seconds,
+			float64(all.QMin)/1e6,
+			float64(all.QMax)/1e6,
+			all.WNums+all.QNums,
+		)
+		fmt.Fprintln(w, line)
+	} else {
+		fmt.Fprintln(w, "time   \t\t tps   \twtps  \trtps  \t          w-rsp(ms)\t          r-rsp(ms)              total-number")
+		line := fmt.Sprintf("[%ds]\t\t%d\t%d\t%d\t[avg:%.2f,min:%.2f,max:%.2f]\t[avg:%.2f,min:%.2f,max:%.2f]\t    %v\n",
+			m.seconds,
+			int(events/seconds),
+			int(writes/seconds),
+			int(reads/seconds),
+			float64(all.WCosts)/1e6/writes/seconds,
+			float64(all.WMin)/1e6,
+			float64(all.WMax)/1e6,
+			float64(all.QCosts)/1e6/reads/seconds,
+			float64(all.QMin)/1e6,
+			float64(all.QMax)/1e6,
+			all.WNums+all.QNums,
+		)
+		fmt.Fprintln(w, line)
+	}
+
 	w.Flush()
 }

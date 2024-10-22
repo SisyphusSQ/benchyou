@@ -10,9 +10,10 @@
 package sysbench
 
 import (
-	"mybenchx/src/xworker"
 	"fmt"
 	"log"
+
+	"mybenchx/src/xworker"
 )
 
 // Table tuple.
@@ -34,13 +35,12 @@ func (t *Table) Prepare() {
 	for i := 0; i < count; i++ {
 		sql := fmt.Sprintf(`create table mybenchx%d (
 							id bigint unsigned not null auto_increment,
-							k int not null default '0',
+							k bigint not null default '0',
 							c varchar(120) not null default '',
 							pad varchar(60) not null default '',
 							created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 							unix_stamp bigint not null default '0',
 							primary key (id),
-							key idx_k_1 (k),
 							key idx_created_at (created_at),
 							key idx_unix_stamp (unix_stamp)
 							) engine=%s`, i, engine)
@@ -59,6 +59,21 @@ func (t *Table) Cleanup() {
 
 	// for test
 	count := 64
+
+	for i := 0; i < count; i++ {
+		sql := fmt.Sprintf(`drop table mybenchx%d;`, i)
+
+		if err := session.Exec(sql).Error; err != nil {
+			log.Panicf("drop.table.error[%v]", err)
+		}
+		log.Printf("drop table mybenchx%d finished...\n", i)
+	}
+}
+
+// CleanupForCount used to cleanup the tables.
+func (t *Table) CleanupForCount(count int) {
+	session := t.workers[0].S
+	//count := t.workers[0].N
 
 	for i := 0; i < count; i++ {
 		sql := fmt.Sprintf(`drop table mybenchx%d;`, i)

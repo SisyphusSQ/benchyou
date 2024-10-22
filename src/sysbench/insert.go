@@ -10,10 +10,7 @@
 package sysbench
 
 import (
-	"mybenchx/src/xcommon"
-	"mybenchx/src/xworker"
 	"fmt"
-	"gorm.io/gorm"
 	"log"
 	"math"
 	"math/rand"
@@ -22,6 +19,10 @@ import (
 	"time"
 
 	"github.com/xelabs/go-mysqlstack/sqlparser/depends/common"
+	"gorm.io/gorm"
+
+	"mybenchx/src/xcommon"
+	"mybenchx/src/xworker"
 )
 
 // Insert tuple.
@@ -76,6 +77,8 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 	for !insert.stop {
 		var sql, value string
 		buf := common.NewBuffer(256)
+		// todo : for test
+		//time.Sleep(time.Second * 2)
 
 		table := rand.Int31n(int32(worker.N))
 		if insert.conf.Random {
@@ -136,6 +139,10 @@ func (insert *Insert) Insert(worker *xworker.Worker, num int, id int) {
 		if insert.conf.XA {
 			xaStart(worker, hi, lo)
 		}
+		//if err = tx.Debug().Exec(sql).Error; err != nil {
+		//	log.Panicf("insert.error[%v]", err)
+		//}
+
 		if err = tx.Exec(sql).Error; err != nil {
 			log.Panicf("insert.error[%v]", err)
 		}
