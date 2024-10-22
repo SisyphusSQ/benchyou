@@ -8,3 +8,5 @@ coverage.out
 
 .DS_Store
 
+src/sysbench/insert_test.go
+src/sysbench/table_test.go
