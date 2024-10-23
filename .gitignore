@@ -1,5 +1,5 @@
 bin/*
-pkg/*
+pkg/*x
 
 tags
 coverage.out
@@ -8,3 +8,5 @@ coverage.out
 
 .DS_Store
 
+src/sysbench/insert_test.go
+src/sysbench/table_test.go

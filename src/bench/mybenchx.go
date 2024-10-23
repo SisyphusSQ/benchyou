@@ -15,9 +15,9 @@
 package main
 
 import (
-	"mybenchx/src/xcmd"
 	"fmt"
 	"github.com/spf13/cobra"
+	"mybenchx/src/xcmd"
 	"os"
 	"runtime"
 )
@@ -46,6 +46,7 @@ var (
 	sshPort          int
 	oltpTablesSize   int
 	queryType        string
+	isRDS            bool
 )
 
 var (
@@ -81,6 +82,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&sshPort, "ssh-port", 22, "SSH server port(Default 22)")
 	rootCmd.PersistentFlags().IntVar(&oltpTablesSize, "oltp-table-size", 0, "If not specify, will not fill up table ")
 	rootCmd.PersistentFlags().StringVar(&queryType, "query-type", "common", "Query type which [common,time_stamp,unix_stamp] to use")
+	rootCmd.PersistentFlags().BoolVar(&isRDS, "is-rds", false, "If target server is rds")
 
 	rootCmd.AddCommand(xcmd.NewPrepareCommand())
 	rootCmd.AddCommand(xcmd.NewCleanupCommand())

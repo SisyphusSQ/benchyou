@@ -15,10 +15,10 @@
 package xcmd
 
 import (
+	"github.com/spf13/cobra"
 	"mybenchx/src/sysbench"
 	"mybenchx/src/xcommon"
 	"mybenchx/src/xworker"
-	"github.com/spf13/cobra"
 	"time"
 )
 
@@ -116,6 +116,9 @@ func parseConf(cmd *cobra.Command) (conf *xcommon.Conf, err error) {
 		return
 	}
 
+	if conf.IsRDS, err = cmd.Flags().GetBool("is-rds"); err != nil {
+		return
+	}
 
 	xa := 0
 	if xa, err = cmd.Flags().GetInt("mysql-enable-xa"); err != nil {

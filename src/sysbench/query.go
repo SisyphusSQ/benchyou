@@ -104,7 +104,7 @@ func (q *Query) Query(worker *xworker.Worker, num int, id int) {
 			}
 
 			sql := fmt.Sprintf("SELECT * FROM mybenchx%d WHERE id=%v", table, rid)
-			if err := session.Debug().Raw(sql).Scan(&result).Error; err != nil {
+			if err := session.Raw(sql).Scan(&result).Error; err != nil {
 				log.Panicf("query.error[%v]", err)
 			}
 		case "time_stamp":

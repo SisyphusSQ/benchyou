@@ -35,6 +35,7 @@ type Conf struct {
 	OltpTablesCount  int
 	XA               bool
 	Random           bool
+	IsRDS            bool
 	OltpTableSize    int
 	QueryType        string
 }
